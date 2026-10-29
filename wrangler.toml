@@ -1,0 +1,11 @@
+name = "notlar-gh"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "notes-db"
+database_id = "626b7db4-7a05-4fbc-b55c-12a25638c534"
+
+[triggers]
+crons = ["0 * * * *"]

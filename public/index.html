@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#09090b">
+<title>Tek Kullanımlık Not — Semih Algan</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%23059669'/><rect x='6' y='11' width='12' height='9' rx='2' fill='white'/><path d='M8 11V8a4 4 0 0 1 8 0v3' stroke='white' stroke-width='2' fill='none'/></svg>">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      keyframes: {
+        fadeUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        glow: { '0%, 100%': { opacity: '0.3' }, '50%': { opacity: '0.6' } },
+      },
+      animation: {
+        fadeUp: 'fadeUp 0.6s ease-out both',
+        glow: 'glow 7s ease-in-out infinite',
+      },
+    },
+  },
+};
+</script>
+<style>
+  .card { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(8px); }
+  .btn-grad { background-image: linear-gradient(135deg, #10b981, #0d9488); }
+  .btn-grad:hover { filter: brightness(1.1); }
+  .spin { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .view-in { animation: fadeUp 0.5s ease-out both; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="relative min-h-screen overflow-x-hidden bg-zinc-950 text-zinc-100 antialiased">
+
+<div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
+  <div class="absolute -top-40 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-emerald-500/20 blur-3xl animate-glow"></div>
+  <div class="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl animate-glow"></div>
+</div>
+
+<main class="mx-auto flex min-h-screen max-w-xl flex-col px-4 py-10">
+
+  <header class="mb-8 flex items-center gap-4 animate-fadeUp">
+    <div class="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 shadow-lg shadow-emerald-900/40">
+      <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="11" width="14" height="10" rx="2"/>
+        <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="text-xl font-semibold tracking-tight">Tek Kullanımlık Not</h1>
+      <p class="text-xs text-zinc-500">Şifreli · Süreli · Geri alınamaz</p>
+    </div>
+  </header>
+
+  <p class="mb-6 text-sm leading-relaxed text-zinc-400 animate-fadeUp" style="animation-delay: 0.1s">
+    Notunuz tarayıcınızda şifrelenir. Sunucu yalnızca şifreli halini saklar. Anahtar linkin <code class="rounded bg-zinc-800 px-1.5 py-0.5 text-emerald-300">#</code> kısmındadır ve sunucuya gitmez.
+  </p>
+
+  <!-- Not oluşturma -->
+  <section id="create" class="card space-y-4 rounded-2xl border border-zinc-800 p-5 shadow-xl shadow-black/30 animate-fadeUp" style="animation-delay: 0.2s">
+    <div class="relative">
+      <textarea id="text" maxlength="20000" rows="8" placeholder="Notunuzu yazın..."
+        class="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20"></textarea>
+      <span id="count" class="absolute bottom-3 right-4 text-xs text-zinc-500">0 / 20000</span>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+      <label class="block text-xs font-medium uppercase tracking-wider text-zinc-500">
+        Yok olma süresi
+        <select id="mode" class="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-900/80 p-2.5 text-sm normal-case tracking-normal text-zinc-100 outline-none transition focus:border-emerald-500">
+          <option value="read_once">Okunduktan hemen sonra</option>
+          <option value="1h">1 saat sonra</option>
+          <option value="1d">1 gün sonra</option>
+        </select>
+      </label>
+      <button id="createBtn" class="btn-grad inline-flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition active:scale-95 disabled:opacity-60">
+        <span id="createLabel">Link oluştur</span>
+        <svg id="spinner" class="hidden h-4 w-4 spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M12 3a9 9 0 1 0 9 9"/>
+        </svg>
+      </button>
+    </div>
+    <p id="createErr" class="hidden rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400"></p>
+
+    <div id="result" class="view-in hidden space-y-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+      <p class="text-sm text-zinc-300">Link hazır. Yalnızca alıcıya gönderin.</p>
+      <div class="flex gap-2">
+        <input id="link" readonly class="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 font-mono text-xs text-zinc-300 outline-none">
+        <button id="copyBtn" class="rounded-lg bg-zinc-800 px-4 text-sm font-medium transition hover:bg-zinc-700 active:scale-95">Kopyala</button>
+      </div>
+      <p id="copied" class="hidden text-sm text-emerald-400">✓ Panoya kopyalandı</p>
+    </div>
+  </section>
+
+  <!-- Not görüntüleme -->
+  <section id="view" class="card hidden space-y-4 rounded-2xl border border-zinc-800 p-5 shadow-xl shadow-black/30 animate-fadeUp">
+    <p class="text-sm leading-relaxed text-zinc-400">
+      Bu not size gönderildi. "Notu göster"e basınca açılır. "Okunduktan hemen sonra" seçildiyse not sunucudan kalıcı olarak silinir.
+    </p>
+    <button id="revealBtn" class="btn-grad w-full rounded-lg py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition active:scale-95 disabled:opacity-60">Notu göster</button>
+    <p id="viewErr" class="hidden rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400"></p>
+    <pre id="content" class="hidden whitespace-pre-wrap break-words rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 text-sm leading-relaxed animate-fadeUp"></pre>
+    <a id="newNote" href="/" class="hidden text-center text-sm text-emerald-400 hover:underline">+ Yeni not oluştur</a>
+  </section>
+
+  <footer class="mt-auto pt-10 text-center text-xs text-zinc-600">Semih Algan · notlar.semihalgan.com.tr</footer>
+</main>
+
+<script>
+var $ = function (id) { return document.getElementById(id); };
+var enc = new TextEncoder();
+var dec = new TextDecoder();
+
+function toB64(bytes) {
+  var s = '';
+  for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
+function fromB64(b64) {
+  var s = atob(b64);
+  var out = new Uint8Array(s.length);
+  for (var i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out;
+}
+function toB64u(bytes) {
+  return toB64(bytes).split('+').join('-').split('/').join('_').split('=').join('');
+}
+function fromB64u(s) {
+  var b = s.split('-').join('+').split('_').join('/');
+  while (b.length % 4 !== 0) b += '=';
+  return fromB64(b);
+}
+
+async function encrypt(text) {
+  var key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, enc.encode(text)));
+  var all = new Uint8Array(iv.length + ct.length);
+  all.set(iv);
+  all.set(ct, iv.length);
+  var raw = new Uint8Array(await crypto.subtle.exportKey('raw', key));
+  return { ciphertext: toB64(all), keyStr: toB64u(raw) };
+}
+
+async function decrypt(ciphertext, keyStr) {
+  var key = await crypto.subtle.importKey('raw', fromB64u(keyStr), 'AES-GCM', false, ['decrypt']);
+  var all = fromB64(ciphertext);
+  var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(0, 12) }, key, all.slice(12));
+  return dec.decode(pt);
+}
+
+function showErr(id, msg) {
+  var el = $(id);
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideErr(id) {
+  $(id).classList.add('hidden');
+}
+
+// Karakter sayacı
+$('text').oninput = function () {
+  $('count').textContent = $('text').value.length + ' / 20000';
+};
+
+// Not oluşturma
+$('createBtn').onclick = async function () {
+  hideErr('createErr');
+  var text = $('text').value.trim();
+  if (!text) return showErr('createErr', 'Önce bir not yazın.');
+
+  $('createBtn').disabled = true;
+  $('createLabel').textContent = 'Oluşturuluyor...';
+  $('spinner').classList.remove('hidden');
+  try {
+    var r = await encrypt(text);
+    var res = await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ciphertext: r.ciphertext, mode: $('mode').value }),
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Bir hata oluştu.');
+    $('link').value = location.origin + '/#' + data.id + '.' + r.keyStr;
+    $('result').classList.remove('hidden');
+  } catch (e) {
+    showErr('createErr', (e && e.message) || 'Bir hata oluştu.');
+  } finally {
+    $('createBtn').disabled = false;
+    $('createLabel').textContent = 'Link oluştur';
+    $('spinner').classList.add('hidden');
+  }
+};
+
+// Linki kopyala
+$('copyBtn').onclick = async function () {
+  try {
+    await navigator.clipboard.writeText($('link').value);
+  } catch (e) {
+    $('link').select();
+    document.execCommand('copy');
+  }
+  $('copied').classList.remove('hidden');
+  setTimeout(function () { $('copied').classList.add('hidden'); }, 2000);
+};
+
+// Not açma
+async function reveal(id, keyStr) {
+  hideErr('viewErr');
+  $('revealBtn').disabled = true;
+  $('revealBtn').textContent = 'Açılıyor...';
+  try {
+    var res = await fetch('/api/notes/' + encodeURIComponent(id) + '/read', { method: 'POST' });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    $('content').textContent = await decrypt(data.body, keyStr);
+    $('content').classList.remove('hidden');
+    $('newNote').classList.remove('hidden');
+    $('revealBtn').classList.add('hidden');
+    history.replaceState(null, '', '/');
+  } catch (e) {
+    showErr('viewErr', (e && e.message) || 'Not açılamadı.');
+    $('revealBtn').disabled = false;
+    $('revealBtn').textContent = 'Notu göster';
+  }
+}
+
+// Ekran yönlendirme: linkte # varsa görüntüleme, yoksa oluşturma
+function route() {
+  var parts = location.hash.slice(1).split('.');
+  var id = parts[0];
+  var keyStr = parts[1];
+  if (id && keyStr) {
+    $('create').classList.add('hidden');
+    $('view').classList.remove('hidden');
+    $('revealBtn').onclick = function () { reveal(id, keyStr); };
+  } else {
+    $('create').classList.remove('hidden');
+    $('view').classList.add('hidden');
+  }
+}
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>

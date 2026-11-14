@@ -8,8 +8,8 @@ binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "notes-db"
-database_id = "626b7db4-7a05-4fbc-b55c-12a25638c534"
+database_name = "db-yazilim"
+database_id = "fdf383b2-4982-495d-af8f-e8e1de1c5690"
 
 [triggers]
 crons = ["0 * * * *"]

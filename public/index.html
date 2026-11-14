@@ -48,6 +48,22 @@ tailwind.config = {
     color: #059669;
   }
   .spin { animation: spin 0.8s linear infinite; }
+  #content.note-protected {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  @media print {
+    body * { visibility: hidden !important; }
+    body::after {
+      content: "Bu sayfa yazdırılamaz.";
+      visibility: visible;
+      position: fixed;
+      inset: 2rem;
+      font: 16px sans-serif;
+      color: #18181b;
+    }
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -267,6 +283,7 @@ async function reveal(id, keyStr) {
     var data = await res.json();
     if (!res.ok) throw new Error(data.error);
     $('content').textContent = await decrypt(data.body, keyStr);
+    $('content').classList.add('note-protected');
     $('content').classList.remove('hidden');
     $('newNote').classList.remove('hidden');
     $('revealBtn').classList.add('hidden');
@@ -277,6 +294,25 @@ async function reveal(id, keyStr) {
     $('revealBtn').textContent = 'Notu göster';
   }
 }
+
+// Görüntülenen not için tarayıcı içi kopyalama/yazdırma kısıtları.
+// Tarayıcılar ekran görüntüsü alınmasını web sayfalarına güvenilir biçimde bildirmez.
+$('content').addEventListener('copy', function (event) {
+  event.preventDefault();
+});
+$('content').addEventListener('cut', function (event) {
+  event.preventDefault();
+});
+$('content').addEventListener('contextmenu', function (event) {
+  event.preventDefault();
+});
+document.addEventListener('keydown', function (event) {
+  if ($('content').classList.contains('hidden')) return;
+  var key = event.key.toLowerCase();
+  if ((event.ctrlKey || event.metaKey) && ['c', 'x', 'p', 's'].includes(key)) {
+    event.preventDefault();
+  }
+});
 
 // Router
 function route() {
